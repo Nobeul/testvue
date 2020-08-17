@@ -23,7 +23,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index');
 Route::get('/contact', 'ContactController@index');
 Route::post('/contact', 'ContactController@store');
 Route::get('/contactlist', 'ContactController@contactList')->name('contact.list');
@@ -31,3 +31,5 @@ Route::get('/getContacts', 'ContactController@getContacts');
 Route::get('/updatecontact', 'ContactController@updateContactPage');
 Route::get('/getcontact/{id}', 'ContactController@getContactAccordingToId');
 Route::post('/updatecontact/{id}', 'ContactController@updateContact');
+
+Route::get('{path}', 'HomeController@index')->where('path', '[\/\w\.-]*');

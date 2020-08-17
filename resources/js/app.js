@@ -10,8 +10,8 @@ require('admin-lte');
 window.Vue = require('vue');
 import router from './routers/router'
 
-// import VueRouter from 'vue-router'
-// Vue.use(VueRouter)
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
 
 window.axios = require('axios');
 

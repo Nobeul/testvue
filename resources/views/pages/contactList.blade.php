@@ -15,7 +15,7 @@
         <tbody>
             <tr v-for="(contact, index) in contacts">
                 <th scope="row">@{{ ++index }}</th>
-                <td>@{{ contact.name }}</td>
+                <td>@{{ contact.name }}</td>  
                 <td>@{{ contact.email }}</td>
                 <td>@{{ contact.phone }}</td>
                 <td>
