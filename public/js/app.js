@@ -2131,9 +2131,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      editmode: null,
       fields: {},
       errors: {},
       success: false,
@@ -2150,36 +2153,79 @@ __webpack_require__.r(__webpack_exports__);
     });
   },
   methods: {
-    loadUsers: function loadUsers() {
+    update: function update(id) {
       var _this2 = this;
 
+      axios.post('/updatecontact/' + id).then(function (response) {
+        return _this2.fields = response.data;
+      });
+    },
+    editModal: function editModal(id) {
+      var _this3 = this;
+
+      this.editmode = true;
+      $('#addUserModal').modal('show');
+      $('.modal-title').text('Edit User');
+      $('.modal-title').text('Edit User');
+      axios.get('/getcontact/' + id).then(function (response) {
+        return _this3.fields = response.data;
+      });
+    },
+    newModal: function newModal() {
+      $('#addUserModal').modal('show');
+    },
+    deleteUser: function deleteUser(id) {
+      var _this4 = this;
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(function (result) {
+        if (result.value) {
+          axios.post('/deletecontact/' + id);
+          Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+        }
+
+        _this4.loadUsers();
+      });
+    },
+    loadUsers: function loadUsers() {
+      var _this5 = this;
+
       axios.get('/getContacts').then(function (response) {
-        return _this2.contacts = response.data;
+        return _this5.contacts = response.data;
       });
     },
     submit: function submit() {
-      var _this3 = this;
+      var _this6 = this;
+
+      this.editmode = false;
 
       if (this.loaded) {
         this.loaded = false;
         this.success = false;
         this.errors = {};
         axios.post("/contact", this.fields).then(function (response) {
-          _this3.fields = {}; //Clear input fields.
+          _this6.fields = {}; //Clear input fields.
 
-          _this3.loaded = true;
-          _this3.success = true;
+          _this6.loaded = true;
+          _this6.success = true;
           $('#addUserModal').modal('hide');
 
-          _this3.loadUsers();
+          _this6.loadUsers();
         }).then(Toast.fire({
           icon: 'success',
           title: 'User created successfully'
         }))["catch"](function (error) {
-          _this3.loaded = true;
+          _this6.loaded = true;
 
           if (error.response.status === 422) {
-            _this3.errors = error.response.data.errors || {};
+            _this6.errors = error.response.data.errors || {};
           }
         });
       }
@@ -41272,7 +41318,33 @@ var render = function() {
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(contact.phone))]),
                         _vm._v(" "),
-                        _vm._m(2, true)
+                        _c("td", [
+                          _c(
+                            "a",
+                            {
+                              attrs: { href: "#" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.editModal(contact.id)
+                                }
+                              }
+                            },
+                            [_c("i", { staticClass: "fa fa-edit text-blue" })]
+                          ),
+                          _vm._v(" /\n                    "),
+                          _c(
+                            "a",
+                            {
+                              attrs: { href: "#" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.deleteUser(contact.id)
+                                }
+                              }
+                            },
+                            [_c("i", { staticClass: "fa fa-trash text-red" })]
+                          )
+                        ])
                       ])
                     }),
                     0
@@ -41306,7 +41378,31 @@ var render = function() {
           },
           [
             _c("div", { staticClass: "modal-content" }, [
-              _vm._m(3),
+              _c("div", { staticClass: "modal-header" }, [
+                _c(
+                  "h5",
+                  { staticClass: "modal-title", attrs: { id: "addUserModal" } },
+                  [_vm._v("Add New User")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.newModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
               _vm._v(" "),
               _c(
                 "form",
@@ -41314,7 +41410,7 @@ var render = function() {
                   on: {
                     submit: function($event) {
                       $event.preventDefault()
-                      return _vm.submit($event)
+                      _vm.editmode ? _vm.editMode(_vm.contact.id) : _vm.submit()
                     }
                   }
                 },
@@ -41421,7 +41517,50 @@ var render = function() {
                     ])
                   ]),
                   _vm._v(" "),
-                  _vm._m(4)
+                  _c("div", { staticClass: "modal-footer" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger",
+                        attrs: { type: "button", "data-dismiss": "modal" }
+                      },
+                      [_vm._v("Close")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.editmode,
+                            expression: "editmode"
+                          }
+                        ],
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "submit", id: "save" }
+                      },
+                      [_vm._v("Update")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: !_vm.editmode,
+                            expression: "!editmode"
+                          }
+                        ],
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "submit", id: "save" }
+                      },
+                      [_vm._v("Create")]
+                    )
+                  ])
                 ]
               )
             ])
@@ -41466,64 +41605,6 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Action")])
       ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("a", { attrs: { href: "" } }, [
-        _c("i", { staticClass: "fa fa-edit text-blue" })
-      ]),
-      _vm._v(" /\n                    "),
-      _c("a", { attrs: { href: "" } }, [
-        _c("i", { staticClass: "fa fa-trash text-red" })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-header" }, [
-      _c("h5", { staticClass: "modal-title", attrs: { id: "addUserModal" } }, [
-        _vm._v("Add New User")
-      ]),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "close",
-          attrs: {
-            type: "button",
-            "data-dismiss": "modal",
-            "aria-label": "Close"
-          }
-        },
-        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
-      )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-footer" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-danger",
-          attrs: { type: "button", "data-dismiss": "modal" }
-        },
-        [_vm._v("Close")]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        { staticClass: "btn btn-primary", attrs: { type: "submit" } },
-        [_vm._v("Create")]
-      )
     ])
   }
 ]

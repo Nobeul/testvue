@@ -31,5 +31,6 @@ Route::get('/getContacts', 'ContactController@getContacts');
 Route::get('/updatecontact', 'ContactController@updateContactPage');
 Route::get('/getcontact/{id}', 'ContactController@getContactAccordingToId');
 Route::post('/updatecontact/{id}', 'ContactController@updateContact');
+Route::post('/deletecontact/{id}', 'ContactController@deleteContact');
 
 Route::get('{path}', 'HomeController@index')->where('path', '[\/\w\.-]*');

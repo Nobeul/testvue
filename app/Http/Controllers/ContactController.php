@@ -48,4 +48,9 @@ class ContactController extends Controller
         $contact->phone = $request->phone;
         $contact->save();
     }
+
+    public function deleteContact(Request $request){
+        $contact = Contact::find($request->id);
+        $contact->delete();
+    }
 }

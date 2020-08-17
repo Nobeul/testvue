@@ -34,10 +34,10 @@
                     <td>{{ contact.email }}</td>
                     <td>{{ contact.phone }}</td>
                     <td>
-                      <a href>
+                      <a href='#' @click='editModal(contact.id)'>
                         <i class="fa fa-edit text-blue"></i>
                       </a> /
-                      <a href>
+                      <a href='#' @click='deleteUser(contact.id)'>
                         <i class="fa fa-trash text-red"></i>
                       </a>
                     </td>
@@ -67,11 +67,12 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="addUserModal">Add New User</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close" @click="newModal()">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form @submit.prevent="submit">
+          
+          <form @submit.prevent="editmode ? editMode(contact.id) : submit()">
             <div class="modal-body">
               <div class="form-group">
                 <label for="name">Name</label>
@@ -93,7 +94,8 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Create</button>
+              <button v-show="editmode" type="submit" class="btn btn-primary" id="save">Update</button>
+              <button v-show="!editmode" type="submit" class="btn btn-primary" id="save">Create</button>
             </div>
           </form>
         </div>
@@ -106,11 +108,12 @@
     export default {
     data() {
         return {
-        fields: {},
-        errors: {},
-        success: false,
-        loaded: true,
-        contacts: null
+            editmode: null,
+            fields: {},
+            errors: {},
+            success: false,
+            loaded: true,
+            contacts: null,
         };
     },
     mounted() {
@@ -119,11 +122,49 @@
                     .then(response => (this.contacts = response.data))
             },
     methods: {
+        update(id){
+            axios.post('/updatecontact/'+id)
+                    .then(response => (this.fields = response.data))
+        },
+        editModal(id){
+            this.editmode=true;
+                $('#addUserModal').modal('show');
+                $('.modal-title').text('Edit User');
+                $('.modal-title').text('Edit User');
+                axios.get('/getcontact/'+id)
+                    .then(response => (this.fields = response.data))         
+        },
+        newModal(){
+                $('#addUserModal').modal('show');
+        },
+        deleteUser(id){
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                axios.post('/deletecontact/'+id)
+                Swal.fire(
+                'Deleted!',
+                'Your file has been deleted.',
+                'success'
+                )
+            }
+            this.loadUsers();
+            })
+        },
         loadUsers(){
         axios.get('/getContacts')
                     .then(response => (this.contacts = response.data))
         },
         submit() {
+        this.editmode=false;
+
         if (this.loaded) {
             this.loaded = false;
             this.success = false;
