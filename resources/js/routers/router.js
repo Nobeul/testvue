@@ -1,17 +1,22 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 Vue.use(Router)
-import d from '../components/d.vue'
+import users from '../components/Users.vue'
 import e from '../components/e.vue'
+import ContactForm from '../components/ContactForm.vue'
 
 const routes = [
     { 
-        path: '/d', 
-        component: d 
+        path: '/users', 
+        component: users 
     },
     { 
         path: '/e', 
-        component: e 
+        component: e
+    },
+    { 
+        path: '/contact', 
+        component: ContactForm
     }
     
 ]
