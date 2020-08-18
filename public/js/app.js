@@ -2133,11 +2133,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      editmode: null,
-      fields: {},
+      editmode: false,
+      fields: {
+        id: '',
+        name: '',
+        email: '',
+        phone: ''
+      },
       errors: {},
       success: false,
       loaded: true,
@@ -2147,32 +2153,36 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    console.log('res');
     axios.get('/getContacts').then(function (response) {
       return _this.contacts = response.data;
     });
   },
   methods: {
-    update: function update(id) {
-      var _this2 = this;
-
-      axios.post('/updatecontact/' + id).then(function (response) {
-        return _this2.fields = response.data;
-      });
-    },
     editModal: function editModal(id) {
-      var _this3 = this;
+      var _this2 = this;
 
       this.editmode = true;
       $('#addUserModal').modal('show');
-      $('.modal-title').text('Edit User');
-      $('.modal-title').text('Edit User');
       axios.get('/getcontact/' + id).then(function (response) {
-        return _this3.fields = response.data;
+        return _this2.fields = response.data;
+      });
+    },
+    updateUser: function updateUser(id) {
+      var _this3 = this;
+
+      axios.post('/updatecontact/' + id, this.fields);
+      $('#addUserModal').modal('hide');
+      axios.get('/getContacts').then(function (response) {
+        return _this3.contacts = response.data;
       });
     },
     newModal: function newModal() {
+      this.editmode = false;
+      this.fields = {};
       $('#addUserModal').modal('show');
+    },
+    closeModal: function closeModal() {
+      $('#addUserModal').modal('hide');
     },
     deleteUser: function deleteUser(id) {
       var _this4 = this;
@@ -41294,7 +41304,23 @@ var render = function() {
       _c("div", { staticClass: "row" }, [
         _c("div", { staticClass: "col-12" }, [
           _c("div", { staticClass: "card mt-5" }, [
-            _vm._m(0),
+            _c("div", { staticClass: "card-header" }, [
+              _c("h3", { staticClass: "card-title" }, [_vm._v("Users List")]),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-success",
+                  staticStyle: { float: "right" },
+                  on: {
+                    click: function($event) {
+                      return _vm.newModal()
+                    }
+                  }
+                },
+                [_c("i", { staticClass: "fa fa-user-plus" })]
+              )
+            ]),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
               _c(
@@ -41304,7 +41330,7 @@ var render = function() {
                   attrs: { id: "example2" }
                 },
                 [
-                  _vm._m(1),
+                  _vm._m(0),
                   _vm._v(" "),
                   _c(
                     "tbody",
@@ -41381,8 +41407,36 @@ var render = function() {
               _c("div", { staticClass: "modal-header" }, [
                 _c(
                   "h5",
-                  { staticClass: "modal-title", attrs: { id: "addUserModal" } },
+                  {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: !_vm.editmode,
+                        expression: "!editmode"
+                      }
+                    ],
+                    staticClass: "modal-title",
+                    attrs: { id: "addUserModal" }
+                  },
                   [_vm._v("Add New User")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "h5",
+                  {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.editmode,
+                        expression: "editmode"
+                      }
+                    ],
+                    staticClass: "modal-title",
+                    attrs: { id: "addUserModal" }
+                  },
+                  [_vm._v("Edit User")]
                 ),
                 _vm._v(" "),
                 _c(
@@ -41392,7 +41446,7 @@ var render = function() {
                     attrs: { type: "button" },
                     on: {
                       click: function($event) {
-                        return _vm.newModal()
+                        return _vm.closeModal()
                       }
                     }
                   },
@@ -41410,11 +41464,32 @@ var render = function() {
                   on: {
                     submit: function($event) {
                       $event.preventDefault()
-                      _vm.editmode ? _vm.editMode(_vm.contact.id) : _vm.submit()
+                      _vm.editmode ? _vm.editModal(_vm.fields.id) : _vm.submit()
                     }
                   }
                 },
                 [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.fields.id,
+                        expression: "fields.id"
+                      }
+                    ],
+                    attrs: { type: "hidden", name: "id" },
+                    domProps: { value: _vm.fields.id },
+                    on: {
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.fields, "id", $event.target.value)
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
                   _c("div", { staticClass: "modal-body" }, [
                     _c("div", { staticClass: "form-group" }, [
                       _c("label", { attrs: { for: "name" } }, [_vm._v("Name")]),
@@ -41539,7 +41614,12 @@ var render = function() {
                           }
                         ],
                         staticClass: "btn btn-primary",
-                        attrs: { type: "submit", id: "save" }
+                        attrs: { type: "submit", id: "save" },
+                        on: {
+                          click: function($event) {
+                            return _vm.updateUser(_vm.fields.id)
+                          }
+                        }
                       },
                       [_vm._v("Update")]
                     ),
@@ -41571,24 +41651,6 @@ var render = function() {
   ])
 }
 var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-header" }, [
-      _c("h3", { staticClass: "card-title" }, [_vm._v("Users List")]),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          staticStyle: { float: "right" },
-          attrs: { "data-toggle": "modal", "data-target": "#addUserModal" }
-        },
-        [_c("i", { staticClass: "fa fa-user-plus" })]
-      )
-    ])
-  },
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -57290,15 +57352,14 @@ __webpack_require__.r(__webpack_exports__);
 /*!*******************************************!*\
   !*** ./resources/js/components/Users.vue ***!
   \*******************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Users_vue_vue_type_template_id_30c27aa6___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Users.vue?vue&type=template&id=30c27aa6& */ "./resources/js/components/Users.vue?vue&type=template&id=30c27aa6&");
 /* harmony import */ var _Users_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Users.vue?vue&type=script&lang=js& */ "./resources/js/components/Users.vue?vue&type=script&lang=js&");
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Users_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Users_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -57328,7 +57389,7 @@ component.options.__file = "resources/js/components/Users.vue"
 /*!********************************************************************!*\
   !*** ./resources/js/components/Users.vue?vue&type=script&lang=js& ***!
   \********************************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

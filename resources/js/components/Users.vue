@@ -9,8 +9,7 @@
               <button
                 class="btn btn-success"
                 style="float:right"
-                data-toggle="modal"
-                data-target="#addUserModal"
+                @click="newModal()"
               >
                 <i class="fa fa-user-plus"></i>
               </button>
@@ -66,13 +65,15 @@
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addUserModal">Add New User</h5>
-            <button type="button" class="close" @click="newModal()">
+            <h5 v-show="!editmode" class="modal-title" id="addUserModal">Add New User</h5>
+            <h5 v-show="editmode" class="modal-title" id="addUserModal">Edit User</h5>
+            <button type="button" class="close" @click="closeModal()">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           
-          <form @submit.prevent="editmode ? editMode(contact.id) : submit()">
+          <form @submit.prevent="editmode ? editModal(fields.id) : submit()">
+            <input type="hidden" name='id' v-model="fields.id" />
             <div class="modal-body">
               <div class="form-group">
                 <label for="name">Name</label>
@@ -94,7 +95,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              <button v-show="editmode" type="submit" class="btn btn-primary" id="save">Update</button>
+              <button v-show="editmode" @click="updateUser(fields.id)" type="submit" class="btn btn-primary" id="save">Update</button>
               <button v-show="!editmode" type="submit" class="btn btn-primary" id="save">Create</button>
             </div>
           </form>
@@ -108,8 +109,13 @@
     export default {
     data() {
         return {
-            editmode: null,
-            fields: {},
+            editmode: false,
+            fields: {
+              id:'',
+              name:'',
+              email:'',
+              phone:''
+            },
             errors: {},
             success: false,
             loaded: true,
@@ -117,25 +123,30 @@
         };
     },
     mounted() {
-                console.log('res')
-                axios.get('/getContacts')
-                    .then(response => (this.contacts = response.data))
+        axios.get('/getContacts')
+              .then(response => (this.contacts = response.data))
             },
     methods: {
-        update(id){
-            axios.post('/updatecontact/'+id)
-                    .then(response => (this.fields = response.data))
-        },
         editModal(id){
             this.editmode=true;
                 $('#addUserModal').modal('show');
-                $('.modal-title').text('Edit User');
-                $('.modal-title').text('Edit User');
                 axios.get('/getcontact/'+id)
-                    .then(response => (this.fields = response.data))         
+                    .then(response => (this.fields = response.data))    
+        },
+        updateUser(id){
+          axios.post('/updatecontact/'+id, this.fields)
+          $('#addUserModal').modal('hide');
+          axios
+          .get('/getContacts')
+          .then(response => (this.contacts = response.data))
         },
         newModal(){
-                $('#addUserModal').modal('show');
+          this.editmode=false;
+          this.fields= {};
+          $('#addUserModal').modal('show');
+        },
+        closeModal(){
+          $('#addUserModal').modal('hide');
         },
         deleteUser(id){
             Swal.fire({
